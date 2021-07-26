@@ -1,4 +1,5 @@
 using eShopSolution.Application.Catalog.Products;
+using eShopSolution.Application.Common;
 using eShopSolution.Date.EF;
 using eShopSolution.Utilities.Constant;
 using Microsoft.AspNetCore.Builder;
@@ -31,12 +32,14 @@ namespace eShopSolution.BackendAPI
             services.AddDbContext<EShopDbContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString(SystemConstants.MainConnectionString)));
             //Khai bao
+            services.AddTransient<IStorageService, FileStorageService>();
             services.AddTransient<IPublicProductService, PublicProductService>();
+            services.AddTransient<IManageProductService, ManageProductService>();
             services.AddControllersWithViews();
             services.AddSwaggerGen(c => 
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title="Swagger eShop Solution",Version="v1" });
-
+                c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
             });
         }
 
