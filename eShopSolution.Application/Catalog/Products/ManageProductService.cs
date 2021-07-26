@@ -1,7 +1,10 @@
-﻿using eShopSolution.Application.Common;
+﻿
+using eShopSolution.Application.Common;
 using eShopSolution.Data.Entities;
 using eShopSolution.Date.EF;
 using eShopSolution.Utilities.Exceptions;
+using eShopSolution.ViewMoldes.Catalog.ProductImage;
+using eShopSolution.ViewMoldes.Catalog.ProductImages;
 using eShopSolution.ViewMoldes.Catalog.Products;
 using eShopSolution.ViewMoldes.Common;
 using Microsoft.AspNetCore.Http;
@@ -25,10 +28,25 @@ namespace eShopSolution.Application.Catalog.Products
             _storageService = storageService;
         }
 
-        public  Task<int> AddImages(int productId, List<IFormFile> files)
+        public async Task<int> AddImage(int productId, ProductIamgeCreateRequest request)
         {
-            throw new NotImplementedException();
-        }
+            var productImage = new ProductImage()
+            {
+                Caption = request.Caption,
+                DateCreated = DateTime.Now,
+                IsDefault = request.IsDefault,
+                ProductId = productId,
+                SortOrder = request.SortOrder
+            };
+            if (request.ImageFile != null)
+            {
+                productImage.ImagePath = await this.SaveFile(request.ImageFile);
+                productImage.FileSize = request.ImageFile.Length;
+            }
+            _context.ProductImages.Add(productImage);
+             await _context.SaveChangesAsync();
+            return productImage.Id;
+        } 
 
         public async Task AddViewCount(int productId)
         {
@@ -77,7 +95,8 @@ namespace eShopSolution.Application.Catalog.Products
                 };
             }
             _context.Products.Add(product);
-            return await _context.SaveChangesAsync();
+             await _context.SaveChangesAsync();
+            return product.Id;
         }
         public async Task<int> Delete(int productId)
         {
@@ -134,14 +153,76 @@ namespace eShopSolution.Application.Catalog.Products
             return pagedResult;
         }
 
-        public Task<List<ProductImageViewModle>> GetListImage(int productId)
+        public async Task<ProductViewModle> GetById(int productId, string langugeId)
         {
-            throw new NotImplementedException();
+            var product = await _context.Products.FindAsync(productId);
+            var productTranslation = await _context.ProductTranslations.FirstOrDefaultAsync(
+                x => x.ProductId == productId
+                && x.LanguageId==langugeId);
+            var productViewModle = new ProductViewModle()
+            {
+                Id = product.Id,
+                DateCreated = product.DateCreated,
+                Description = productTranslation != null ? productTranslation.Description : null,
+                LanguageId = productTranslation.LanguageId,
+                Details = productTranslation != null ? productTranslation.Details : null,
+                Name = productTranslation != null ? productTranslation.Name : null,
+                Price=product.Price,
+                SeoAlias = productTranslation != null ? productTranslation.SeoAlias : null,
+                SeoDescription = productTranslation != null ? productTranslation.SeoDescription : null,
+                SeoTitle= productTranslation != null ? productTranslation.SeoTitle : null,
+                Stock = product.Stock,
+                ViewCount=product.ViewCount,
+            };
+            return productViewModle;
         }
 
-        public Task<int> RemoveImages(int imageId)
+        public async Task<ProductImageViewModle> GetImageByID(int imageId)
         {
-            throw new NotImplementedException();
+            var imgage = await _context.ProductImages.FindAsync(imageId);
+            if (imgage == null)
+            {
+                throw new EShopException("Cannot find a imageId wtih id :{imageId}");
+            }
+                var viewmodle= new ProductImageViewModle()
+                {
+                    Caption = imgage.Caption,
+                    DateCreated = imgage.DateCreated,
+                    FileSize = imgage.FileSize,
+                    Id = imgage.Id,
+                    ImagePath = imgage.ImagePath,
+                    IsDefault = imgage.IsDefault,
+                    ProductId = imgage.ProductId,
+                    SortOrder = imgage.SortOrder,
+                };
+            return viewmodle;
+        }
+
+        public async Task<List<ProductImageViewModle>> GetListImages(int productId)
+        {
+            return await _context.ProductImages.Where(x => x.ProductId == productId).
+                Select(i => new ProductImageViewModle()
+                {
+                    Caption=i.Caption,
+                    DateCreated=i.DateCreated,
+                    FileSize=i.FileSize,
+                    Id=i.Id,
+                    ImagePath=i.ImagePath,
+                    IsDefault=i.IsDefault,
+                    ProductId=i.ProductId,
+                    SortOrder=i.SortOrder,
+                }).ToListAsync();
+        }
+
+        public async Task<int> RemoveImage( int imageId)
+        {
+            var productImage = await _context.ProductImages.FindAsync(imageId);
+            if (productImage == null)
+            {
+                throw new EShopException("Cannot find a imageId wtih id :{imageId}");
+            }
+            _context.ProductImages.Remove(productImage);
+           return await _context.SaveChangesAsync();
         }
 
         public async Task<int> Update(ProductUpdateRequest request)
@@ -171,9 +252,20 @@ namespace eShopSolution.Application.Catalog.Products
             return await _context.SaveChangesAsync();
         }
 
-        public Task<int> UpdateImages(int imageId, string caption, bool isdefault)
+        public async Task<int> UpdateImage(int imageId, ProductIamgeUpdateRequest request)
         {
-            throw new NotImplementedException();
+            var productImage = await _context.ProductImages.FindAsync(imageId);
+            if (productImage == null)
+            {
+                throw new EShopException("cannot find ID{imageId}");
+            }
+            if (request.ImageFile != null)
+            {
+                productImage.ImagePath = await this.SaveFile(request.ImageFile);
+                productImage.FileSize = request.ImageFile.Length;
+            }
+            _context.ProductImages.Update(productImage);
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<bool> UpdatePrice(int ProductId, decimal newPrice)
