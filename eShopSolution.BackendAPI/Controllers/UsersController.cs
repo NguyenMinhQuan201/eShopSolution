@@ -12,43 +12,55 @@ namespace eShopSolution.BackendAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     
     public class UsersController : ControllerBase
     {
-        private readonly IUserService _usersService;
+        private readonly IUserService _userService;
         public UsersController(IUserService usersService)
         {
-            _usersService = usersService;
+            _userService = usersService;
         }
         [HttpPost("authenticate")]
         [AllowAnonymous]
-        public async Task<IActionResult> Authenticate([FromForm] LoginRequest request)
+        public async Task<IActionResult> Authenticate([FromBody] LoginRequest request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var resultToken = await _usersService.Authencate(request);
+
+            var resultToken = await _userService.Authencate(request);
+
             if (string.IsNullOrEmpty(resultToken))
             {
-                return BadRequest(" Incorrect");
+                return BadRequest("Username or password is incorrect.");
             }
-            return Ok(new { token = resultToken });
+           
+            return Ok(resultToken);
         }
-        [HttpPost("register")]
+        [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Register([FromForm] RegisterRequest request)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var result = await _usersService.Register(request);
+
+            var result = await _userService.Register(request);
             if (!result)
             {
                 return BadRequest(" Register is Unsuccessful.");
             }
             return Ok();
+        }
+        //https://localhost/api/user/paging?pageIndex=1&pageSize=10&keyword=
+        [HttpGet("paging")]
+        public async Task<IActionResult> GetAllPaging([FromQuery] GetUserPagingRequest request)
+        {
+            var products = await _userService.GetUserPaging(request);
+            return Ok(products);
         }
     }
 }
