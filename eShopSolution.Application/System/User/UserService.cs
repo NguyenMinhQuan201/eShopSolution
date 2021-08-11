@@ -1,6 +1,5 @@
 ﻿using eShopSolution.Data.Entities;
 using eShopSolution.Date.EF;
-using eShopSolution.ViewModels.Common;
 using eShopSolution.ViewMoldes.Common;
 using eShopSolution.ViewMoldes.System.User;
 using Microsoft.AspNetCore.Identity;
@@ -77,6 +76,7 @@ namespace eShopSolution.Application.System.User
                 FirstName = user.FirstName,
                 Id = user.Id,
                 LastName = user.LastName,
+                UserName=user.UserName
             };
             return new ApiSuccessResult<UserVm>(Uservm);
         }
@@ -109,6 +109,8 @@ namespace eShopSolution.Application.System.User
             var pagedResult = new PagedResult<UserVm>()
             {
                 TotalRecord = totalRow,
+                PageIndex=request.PageIndex,
+                PageSize=request.PageSize,
                 Items = data
             };
             return new ApiSuccessResult<PagedResult<UserVm>>(pagedResult);

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace eShopSolution.ViewModels.Common
+namespace eShopSolution.ViewMoldes.Common
 {
     public class ApiSuccessResult<T> : ApiResult<T>
     {

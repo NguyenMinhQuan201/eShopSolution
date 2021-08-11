@@ -1,5 +1,4 @@
-﻿using eShopSolution.ViewModels.Common;
-using eShopSolution.ViewMoldes.Common;
+﻿using eShopSolution.ViewMoldes.Common;
 using eShopSolution.ViewMoldes.System;
 using eShopSolution.ViewMoldes.System.User;
 using System;
