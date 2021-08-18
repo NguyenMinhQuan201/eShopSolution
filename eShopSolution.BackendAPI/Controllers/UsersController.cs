@@ -35,7 +35,7 @@ namespace eShopSolution.BackendAPI.Controllers
 
             if (string.IsNullOrEmpty(resultToken.ResultObj))
             {
-                return BadRequest("Username or password is incorrect.");
+                return BadRequest(resultToken);
             }
            
             return Ok(resultToken);
@@ -84,6 +84,12 @@ namespace eShopSolution.BackendAPI.Controllers
         public async Task<IActionResult> GetById(Guid Id)
         {
             var products = await _userService.GetById(Id);
+            return Ok(products);
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid Id)
+        {
+            var products = await _userService.Delete(Id);
             return Ok(products);
         }
     }

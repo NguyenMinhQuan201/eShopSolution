@@ -35,9 +35,9 @@ namespace eShopSolution.Application.System.User
         public async Task<ApiResult<string>> Authencate(LoginRequest request)
         {
             var user = await _userManager.FindByNameAsync(request.UserName);
-            if (user == null) return null;
+            if (user == null) return new ApiErrorResult<string>("Tai khoan ko ton tai");
 
-            var result = await _signInManager.PasswordSignInAsync(user, request.PassWord, request.RememberMe, true);
+            var result = await _signInManager.PasswordSignInAsync(user, request.PassWord, request.RememberMe, request.RememberMe);
             if (!result.Succeeded)
             {
                 return new ApiErrorResult<string>("Đăng nhập không đúng");
@@ -60,6 +60,21 @@ namespace eShopSolution.Application.System.User
                 signingCredentials: creds);
 
             return new ApiSuccessResult<string>(new JwtSecurityTokenHandler().WriteToken(token));
+        }
+
+        public async Task<ApiResult<bool>> Delete(Guid Id)
+        {
+            var user = await _userManager.FindByIdAsync(Id.ToString());
+            if (user == null)
+            {
+                return new ApiErrorResult<bool>("User ko ton tai");
+            }
+            var result= await _userManager.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                return new ApiSuccessResult<bool>();
+            }
+            return new ApiErrorResult<bool>("xoa ko thanh cong");
         }
 
         public async Task<ApiResult<UserVm>> GetById(Guid Id)

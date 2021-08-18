@@ -47,7 +47,12 @@ namespace eShopSolution.AdminApp.Controllers
                 PageIndex = pageIndex,
                 PageSize = pageSize
             };
+            ViewBag.Keyword = keyword;
             var data = await _userAPIClient.GetUsersPagings(request);
+            if (TempData["result"] != null)
+            {
+                ViewBag.SuccessMsg = TempData["result"];
+            }
             return View(data.ResultObj);
         }
         [HttpGet]
@@ -74,6 +79,7 @@ namespace eShopSolution.AdminApp.Controllers
                 var result = await _userAPIClient.RegisterUser(request);
                 if (result.IsSuccessed)
                 {
+                    TempData["result"] = "Tao thanh cong";
                     return RedirectToAction("Index");
                 }
             ModelState.AddModelError("", result.Message);
@@ -109,7 +115,10 @@ namespace eShopSolution.AdminApp.Controllers
 
             var result = await _userAPIClient.UpdateUser(request.Id, request);
             if (result.IsSuccessed)
+            {
+                TempData["result"] = "Edit thanh cong";
                 return RedirectToAction("Index");
+            }
 
             ModelState.AddModelError("", result.Message);
             return View(request);
@@ -132,6 +141,34 @@ namespace eShopSolution.AdminApp.Controllers
             validationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Tokens:Key"]));
             ClaimsPrincipal principal = new JwtSecurityTokenHandler().ValidateToken(jwtToken, validationParameters, out validatedToken);
             return principal;
+        }
+        [HttpGet]
+        public IActionResult Delete(Guid id)
+        {
+
+            return View(new UserDeleteRequest()
+            {
+                Id=id 
+            });
+        }
+        [HttpPost]
+        public async Task<IActionResult> Delete(UserDeleteRequest request)
+        {
+
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
+            var result = await _userAPIClient.Delete(request.Id);
+            if (result.IsSuccessed)
+            {
+                TempData["result"] = "Delete thanh cong";
+                return RedirectToAction("Index");
+            }
+            ModelState.AddModelError("", result.Message);
+            return View(request);
+
         }
     }
 }

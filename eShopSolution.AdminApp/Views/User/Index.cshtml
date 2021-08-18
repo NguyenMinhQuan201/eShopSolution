@@ -5,16 +5,45 @@
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+@section Scripts{ 
+    <script>
+        setTimeout(function () {
+            $('#msgAlert').fadeOut('slow');
+        }, 2000);
+    </script>
+}
 <div class="container-fluid px-4">
     <h1 class="mt-4">Danh Sach Nguoi Dung</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="/">Trang Chu</a></li>
         <li class="breadcrumb-item active">Danh Sach Nguoi Dung</li>
     </ol> 
-    <div class="card mb-4">
+    <div class="card mb-12">
+        @if (ViewBag.SuccessMsg!=null) { 
+            <div id="msgAlert"class="alert alert-success" role="alert">
+                @ViewBag.SuccessMsg
+            </div>
+        }
         <div class="card-header">
-            
-            <a class="btn btn-success" asp-action="Index" asp-controller="User">Tao moi</a>
+            <div class="row">
+
+                <div class="col-md-6 col-xs-12">
+                    <a class="btn btn-success" asp-action="Index" asp-controller="User">Tao moi</a>
+                </div>
+                <div class="col-md-6 col-xs-12">
+                    <form asp-action="Index" method="get">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <input type="text"value="@ViewBag.Keyword" name="keyword" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary">Tim</button>
+                                <button type="button" class="btn btn-dark"onclick="window.location.href ='/User/Index'">Reset</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
         <div class="card-body">
             <table class="table table-bordered">
@@ -59,7 +88,7 @@
                             </td>
                             <td>
                                 @Html.DisplayFor(modelItem => item.UserName)
-                            
+
 
                             </td>
                             <td>

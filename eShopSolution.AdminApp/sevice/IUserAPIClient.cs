@@ -14,6 +14,7 @@ namespace eShopSolution.AdminApp.sevice
         Task<ApiResult<bool>> RegisterUser(RegisterRequest registerRequest);
         Task<ApiResult<bool>> UpdateUser(Guid Id, UserUpdateRequest request);
         Task<ApiResult<UserVm>> GetById(Guid Id);
+        Task<ApiResult<bool>> Delete(Guid Id);
 
     }
 }
