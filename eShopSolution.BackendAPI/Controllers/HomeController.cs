@@ -28,6 +28,7 @@ namespace eShopSolution.BackendAPI.Controllers
 
         public IActionResult Privacy()
         {
+            var test = "";
             return View();
         }
 
